@@ -11,7 +11,7 @@ const logger = createLogger('auth')
 
 // A certificate that can be used to verify JWT token signature.
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
-const jwksUrl = 'https://mohllal.auth0.com/.well-known/jwks.json'
+const jwksUrl = 'https://mohllal.auth0.com/pem'
 
 export const handler = async (
   event: CustomAuthorizerEvent
@@ -35,7 +35,7 @@ export const handler = async (
       }
     }
   } catch (e) {
-    logger.error('User not authorized', { error: e.message })
+    logger.error('User not authorized', { error: e })
 
     return {
       principalId: 'user',
@@ -63,9 +63,10 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
 
   try {
     const response = await Axios.get(jwksUrl);
-    var verifedToken = verify(token, response.data, { algorithms:['RS256'] })
+    console.log(response);
+    var verifedToken = verify(token,response.data,{algorithms:['RS256']})
 
-    console.log('verfied toekn', verifedToken)
+    console.log('verfied toekn',verifedToken)
     return verifedToken as JwtPayload
   } catch (error) {
     console.error(error);
