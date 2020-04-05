@@ -4,7 +4,6 @@ service:
 package:
   individually: true
   exclude:
-    - "./src/lambda/http/deleteTodo.ts"
     - "./src/lambda/http/generateUploadUrl.ts"
     - "./src/lambda/http/updateTodo.ts"
 
@@ -100,6 +99,15 @@ functions:
             description: Create a new Todo
             requestModels:
               'application/json': CreateTodoRequest
+  
+  DeleteTodo:
+    handler: src/lambda/http/deleteTodo.handler
+    events:
+      - http:
+          method: delete
+          path: todos/{todoId}
+          authorizer: Auth
+          cors: true
   
 resources:
   Resources:
