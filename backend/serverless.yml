@@ -4,7 +4,6 @@ service:
 package:
   individually: true
   exclude:
-    - "./src/lambda/http/createTodo.ts"
     - "./src/lambda/http/deleteTodo.ts"
     - "./src/lambda/http/generateUploadUrl.ts"
     - "./src/lambda/http/updateTodo.ts"
@@ -12,13 +11,25 @@ package:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-aws-documentation
+  - serverless-reqvalidator-plugin
 
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-
+  
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Todo API
+        description: serverless api for Todo application
+    models:
+      - name: CreateTodoRequest
+        contentType: application/json
+        schema: ${file(models/create-todo-request.json)}
 
 provider:
   name: aws
@@ -75,6 +86,21 @@ functions:
           authorizer: Auth
           cors: true
   
+  CreateTodo:
+    handler: src/lambda/http/createTodo.handler
+    events:
+      - http:
+          method: post
+          path: todos
+          authorizer: Auth
+          cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new Todo 
+            description: Create a new Todo
+            requestModels:
+              'application/json': CreateTodoRequest
+  
 resources:
   Resources:
     TodoDynamoDbTable:
@@ -121,3 +147,11 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
