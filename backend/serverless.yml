@@ -1,17 +1,11 @@
 service:
   name: serverless-todo-app
 
-package:
-  individually: true
-  exclude:
-    - "./src/lambda/http/updateTodo.ts"
-
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-aws-documentation
   - serverless-reqvalidator-plugin
-
 
 custom:
   webpack:
@@ -28,6 +22,9 @@ custom:
       - name: CreateTodoRequest
         contentType: application/json
         schema: ${file(models/create-todo-request.json)}
+      - name: UpdateTodoRequest
+        contentType: application/json
+        schema: ${file(validators/update-todo-request.json)}
 
 provider:
   name: aws
@@ -116,6 +113,21 @@ functions:
           path: todos/{todoId}/attachment
           authorizer: Auth
           cors: true
+
+  UpdateTodo:
+    handler: src/lambda/http/updateTodo.handler
+    events:
+      - http:
+          method: put
+          path: todos/{todoId}
+          authorizer: Auth
+          cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update a Todo 
+            description: Update a Todo
+            requestModels:
+              'application/json': UpdateTodoRequest
   
 resources:
   Resources:
