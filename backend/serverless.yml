@@ -4,7 +4,6 @@ service:
 package:
   individually: true
   exclude:
-    - "./src/lambda/http/generateUploadUrl.ts"
     - "./src/lambda/http/updateTodo.ts"
 
 plugins:
@@ -106,6 +105,15 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          authorizer: Auth
+          cors: true
+    
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
           authorizer: Auth
           cors: true
   
