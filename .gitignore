@@ -11,4 +11,4 @@ jspm_packages
 .webpack
 
 # vscode directory
-vscode
+.vscode
